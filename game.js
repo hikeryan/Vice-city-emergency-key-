@@ -22,49 +22,6 @@ new MutationObserver(muteAllMedia).observe(document.documentElement, {
     childList: true,
 });
 
-// Tap the canvas repeatedly, since a real screen tap skips cutscenes.
-function tapCanvasToSkipCutscene() {
-    const canvas = document.getElementById('canvas');
-    if (!canvas) return;
-
-    const rect = canvas.getBoundingRect ? canvas.getBoundingRect() : canvas.getBoundingClientRect();
-    const x = rect.left + rect.width / 2;
-    const y = rect.top + rect.height / 2;
-
-    for (const type of ['pointerdown', 'pointerup']) {
-        canvas.dispatchEvent(new PointerEvent(type, {
-            bubbles: true,
-            cancelable: true,
-            pointerId: 1,
-            pointerType: 'touch',
-            isPrimary: true,
-            clientX: x,
-            clientY: y,
-        }));
-    }
-}
-
-// Also send Enter as a fallback for keyboard devices.
-function pressEnterToSkipCutscene() {
-    const targets = [window, document, document.body, document.getElementById('canvas')].filter(Boolean);
-
-    targets.forEach(target => {
-        target.dispatchEvent(new KeyboardEvent('keydown', {
-            key: 'Enter', code: 'Enter', keyCode: 13, which: 13,
-            bubbles: true, cancelable: true,
-        }));
-    });
-
-    setTimeout(() => {
-        targets.forEach(target => {
-            target.dispatchEvent(new KeyboardEvent('keyup', {
-                key: 'Enter', code: 'Enter', keyCode: 13, which: 13,
-                bubbles: true, cancelable: true,
-            }));
-        });
-    }, 100);
-}
-
 const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 let isTouch = isMobile && window.matchMedia('(pointer: coarse)').matches;
 
@@ -89,7 +46,7 @@ let haveOriginalGame = true;
         disclaimerCheckbox: "I own the original game",
         disclaimerPrompt: "You need to provide a file from the original game to confirm ownership of the original game.",
         cantContinuePlaying: "You can't continue playing in DEMO version. Please provide the original game files to continue playing.",
-        demoAlert: "The demo version is intended only for familiarizing yourself with the game technology. All features are available, but you won’t be able to progress through the game’s storyline. Please provide the original game files to launch the full version.",
+        demoAlert: "The demo version is intended only for familiarizing yourself with the game technology. All features are available, but you won’t be able to progress through the game’s story missions.",
         downloading: "Downloading",
         enterKey: "enter your key",
         clickToContinue: "Click to continue...",
@@ -254,18 +211,6 @@ async function loadGame(data) {
     script.src = 'index.js';
     document.body.appendChild(script);
     document.body.classList.add('gameIsStarted');
-
-    // Start after the loading/intro has time to begin, then tap and press Enter repeatedly.
-    setTimeout(() => {
-        let attempts = 0;
-        const cutsceneSkipInterval = setInterval(() => {
-            attempts += 1;
-            tapCanvasToSkipCutscene();
-            pressEnterToSkipCutscene();
-
-            if (attempts >= 120) clearInterval(cutsceneSkipInterval);
-        }, 1000);
-    }, 10000);
 
     const emulator = new GamepadEmulator();
     emulator.AddEmulatedGamepad(null, true);
