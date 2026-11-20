@@ -399,7 +399,7 @@ NeoRoadGloss=0
 SkinFile=$$""
 Language=0
 DrawVersionText=0
-NoMovies=1
+NoMovies=0
 [CustomPipesValues]
 PostFXIntensity=1.000000
 NeoVehicleShininess=1.000000
