@@ -22,6 +22,27 @@ new MutationObserver(muteAllMedia).observe(document.documentElement, {
     childList: true,
 });
 
+// Automatically press Enter to skip cutscenes.
+function pressEnterToSkipCutscene() {
+    const targets = [window, document, document.body, document.getElementById('canvas')].filter(Boolean);
+
+    targets.forEach(target => {
+        target.dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'Enter', code: 'Enter', keyCode: 13, which: 13,
+            bubbles: true, cancelable: true,
+        }));
+    });
+
+    setTimeout(() => {
+        targets.forEach(target => {
+            target.dispatchEvent(new KeyboardEvent('keyup', {
+                key: 'Enter', code: 'Enter', keyCode: 13, which: 13,
+                bubbles: true, cancelable: true,
+            }));
+        });
+    }, 100);
+}
+
 const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 let isTouch = isMobile && window.matchMedia('(pointer: coarse)').matches;
 
@@ -231,6 +252,11 @@ async function loadGame(data) {
     document.body.appendChild(script);
 
     document.body.classList.add('gameIsStarted');
+
+    // Send Enter at startup and again after the intro is likely active.
+    [3000, 8000, 15000].forEach(delay => {
+        setTimeout(pressEnterToSkipCutscene, delay);
+    });
 
     const emulator = new GamepadEmulator();
     const gamepad = emulator.AddEmulatedGamepad(null, true);
