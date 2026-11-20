@@ -399,7 +399,7 @@ NeoRoadGloss=0
 SkinFile=$$""
 Language=0
 DrawVersionText=0
-NoMovies=0
+NoMovies=1
 [CustomPipesValues]
 PostFXIntensity=1.000000
 NeoVehicleShininess=1.000000
@@ -465,8 +465,15 @@ UNKNOWN_ACTION=
 
 const revc_ini = (() => {
     const cached = localStorage.getItem('vcsky.revc.ini');
-    if (cached) {
-        return cached;
+    let config = cached || revc_iniDefault;
+
+    if (/^NoMovies=.*$/mi.test(config)) {
+        config = config.replace(/^NoMovies=.*$/mi, 'NoMovies=1');
+    } else if (/^\[General\]\s*$/mi.test(config)) {
+        config = config.replace(/^\[General\]\s*$/mi, '[General]\nNoMovies=1');
+    } else {
+        config += '\n[General]\nNoMovies=1\n';
     }
-    return revc_iniDefault;
+
+    return config;
 })();
