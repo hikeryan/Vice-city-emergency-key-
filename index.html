@@ -261,13 +261,13 @@ Promise.all([
 
     loadingText.remove();
 });
-  let wasInCutscene = false;
+  let cutsceneActive = false;
 
 setInterval(() => {
-    const inCutscene =
+    const active =
         document.body.dataset.stateCutscene === "1";
 
-    if (inCutscene && !wasInCutscene) {
+    if (active) {
         const canvas = document.getElementById("canvas");
 
         if (canvas) {
@@ -275,18 +275,12 @@ setInterval(() => {
                 key: "Enter",
                 code: "Enter",
                 keyCode: 13,
-                bubbles: true
-            }));
-
-            canvas.dispatchEvent(new KeyboardEvent("keyup", {
-                key: "Enter",
-                code: "Enter",
-                keyCode: 13,
+                which: 13,
                 bubbles: true
             }));
         }
     }
 
-    wasInCutscene = inCutscene;
-}, 100);
+    cutsceneActive = active;
+}, 300);
 </script>
