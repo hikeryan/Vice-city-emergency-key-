@@ -5,6 +5,23 @@ var spinnerElement = document.getElementById('spinner');
 var data_content;
 var wasm_content;
 
+// Mute every audio element and prevent future elements from producing sound.
+document.querySelectorAll('audio, video').forEach(media => {
+    media.muted = true;
+    media.volume = 0;
+});
+
+const muteAllMedia = () => {
+    document.querySelectorAll('audio, video').forEach(media => {
+        media.muted = true;
+        media.volume = 0;
+    });
+};
+new MutationObserver(muteAllMedia).observe(document.documentElement, {
+    subtree: true,
+    childList: true,
+});
+
 const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 let isTouch = isMobile && window.matchMedia('(pointer: coarse)').matches;
 
@@ -363,13 +380,13 @@ InvertPad=0
 JoystickName=
 PadButtonsInited=0
 [Audio]
-SfxVolume=36
-MusicVolume=37
+SfxVolume=0
+MusicVolume=0
 MP3BoostVolume=0
 Radio=0
 SpeakerType=0
 Provider=0
-DynamicAcoustics=1
+DynamicAcoustics=0
 [Display]
 Brightness=256
 DrawDistance=1.800000
@@ -467,13 +484,27 @@ const revc_ini = (() => {
     const cached = localStorage.getItem('vcsky.revc.ini');
     let config = cached || revc_iniDefault;
 
-    if (/^NoMovies=.*$/mi.test(config)) {
-        config = config.replace(/^NoMovies=.*$/mi, 'NoMovies=1');
-    } else if (/^\[General\]\s*$/mi.test(config)) {
-        config = config.replace(/^\[General\]\s*$/mi, '[General]\nNoMovies=1');
-    } else {
-        config += '\n[General]\nNoMovies=1\n';
-    }
+    const setIniValue = (section, key, value) => {
+        const sectionPattern = new RegExp(`\\[${section}\\][\\s\\S]*?(?=\\n\\[|$)`, 'i');
+        const sectionMatch = config.match(sectionPattern);
+        if (sectionMatch) {
+            const keyPattern = new RegExp(`^${key}=.*$`, 'mi');
+            if (keyPattern.test(sectionMatch[0])) {
+                config = config.replace(keyPattern, `${key}=${value}`);
+            } else {
+                config = config.replace(sectionMatch[0], `${sectionMatch[0]}\n${key}=${value}`);
+            }
+        } else {
+            config += `\n[${section}]\n${key}=${value}\n`;
+        }
+    };
+
+    setIniValue('General', 'NoMovies', '1');
+    setIniValue('Audio', 'SfxVolume', '0');
+    setIniValue('Audio', 'MusicVolume', '0');
+    setIniValue('Audio', 'MP3BoostVolume', '0');
+    setIniValue('Audio', 'Radio', '0');
+    setIniValue('Audio', 'DynamicAcoustics', '0');
 
     return config;
 })();
