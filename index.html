@@ -261,26 +261,4 @@ Promise.all([
 
     loadingText.remove();
 });
-  let cutsceneActive = false;
-
-setInterval(() => {
-    const active =
-        document.body.dataset.stateCutscene === "1";
-
-    if (active) {
-        const canvas = document.getElementById("canvas");
-
-        if (canvas) {
-            canvas.dispatchEvent(new KeyboardEvent("keydown", {
-                key: "Enter",
-                code: "Enter",
-                keyCode: 13,
-                which: 13,
-                bubbles: true
-            }));
-        }
-    }
-
-    cutsceneActive = active;
-}, 300);
-</script>
+  </script>
