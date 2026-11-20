@@ -22,7 +22,7 @@ new MutationObserver(muteAllMedia).observe(document.documentElement, {
     childList: true,
 });
 
-// Automatically press Enter to skip cutscenes.
+// Automatically press Enter repeatedly while the opening cutscene is active.
 function pressEnterToSkipCutscene() {
     const targets = [window, document, document.body, document.getElementById('canvas')].filter(Boolean);
 
@@ -74,7 +74,6 @@ let haveOriginalGame = true;
             enterJsDosKey: "Enter js-dos key",
             portBy: "HTML5 port by:",
             ruTranslate: "",
-        
     };
 
     let currentLanguage = "en";
@@ -131,7 +130,6 @@ var dataPromise = (async function loadData() {
 })();
 
 async function startGame() {
-
     const loaderContainer = document.querySelector('.loader-container');
     loaderContainer.style.display = "flex";
 
@@ -253,10 +251,19 @@ async function loadGame(data) {
 
     document.body.classList.add('gameIsStarted');
 
-    // Send Enter at startup and again after the intro is likely active.
-    [3000, 8000, 15000].forEach(delay => {
-        setTimeout(pressEnterToSkipCutscene, delay);
-    });
+    // Start later, because the game can take a while to enter the opening cutscene.
+    // Repeat briefly so Enter reaches the cutscene even after slow loading.
+    setTimeout(() => {
+        let attempts = 0;
+        const cutsceneSkipInterval = setInterval(() => {
+            attempts += 1;
+            pressEnterToSkipCutscene();
+
+            if (attempts >= 120) {
+                clearInterval(cutsceneSkipInterval);
+            }
+        }, 1000);
+    }, 10000);
 
     const emulator = new GamepadEmulator();
     const gamepad = emulator.AddEmulatedGamepad(null, true);
@@ -358,7 +365,6 @@ async function loadGame(data) {
         tapTarget: document.querySelector('.touch-control.fireLeft'),
     }]);
 }
-
 
 startGame();
 if (!isMobile) {
