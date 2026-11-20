@@ -253,7 +253,7 @@ Promise.all([
     };
 
     // Load game scripts
-    ["gamepademulator.js", "idbfs.js", "game.js"].forEach(src => {
+   ["gamepademulator.js", "idbfs.js"].forEach(src => {
         const script = document.createElement("script");
         script.src = src;
         document.body.appendChild(script);
