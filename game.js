@@ -22,7 +22,29 @@ new MutationObserver(muteAllMedia).observe(document.documentElement, {
     childList: true,
 });
 
-// Automatically press Enter repeatedly while the opening cutscene is active.
+// Tap the canvas repeatedly, since a real screen tap skips cutscenes.
+function tapCanvasToSkipCutscene() {
+    const canvas = document.getElementById('canvas');
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingRect ? canvas.getBoundingRect() : canvas.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+
+    for (const type of ['pointerdown', 'pointerup']) {
+        canvas.dispatchEvent(new PointerEvent(type, {
+            bubbles: true,
+            cancelable: true,
+            pointerId: 1,
+            pointerType: 'touch',
+            isPrimary: true,
+            clientX: x,
+            clientY: y,
+        }));
+    }
+}
+
+// Also send Enter as a fallback for keyboard devices.
 function pressEnterToSkipCutscene() {
     const targets = [window, document, document.body, document.getElementById('canvas')].filter(Boolean);
 
@@ -55,28 +77,26 @@ let haveOriginalGame = true;
 (function () {
     const translations = {
         clickToPlayDemo: "Click to play demo",
-            clickToPlayFull: "Click to play",
-            invalidKey: "invalid key",
-            checking: "checking...",
-            cloudSaves: "Cloud saves:",
-            enabled: "enabled",
-            disabled: "disabled",
-            playDemoText: "You can play the DEMO version, or provide the original game files to play the full version.",
-            disclaimer: "DISCLAIMER:",
-            disclaimerSources: "This game is based on an open source version of GTA: Vice City. It is not a commercial release and is not affiliated with Rockstar Games.",
-            disclaimerCheckbox: "I own the original game",
-            disclaimerPrompt: "You need to provide a file from the original game to confirm ownership of the original game.",
-            cantContinuePlaying: "You can't continue playing in DEMO version. Please provide the original game files to continue playing.",
-            demoAlert: "The demo version is intended only for familiarizing yourself with the game technology. All features are available, but you won’t be able to progress through the game’s storyline. Please provide the original game files to launch the full version.",
-            downloading: "Downloading",
-            enterKey: "enter your key",
-            clickToContinue: "Click to continue...",
-            enterJsDosKey: "Enter js-dos key",
-            portBy: "HTML5 port by:",
-            ruTranslate: "",
+        clickToPlayFull: "Click to play",
+        invalidKey: "invalid key",
+        checking: "checking...",
+        cloudSaves: "Cloud saves:",
+        enabled: "enabled",
+        disabled: "disabled",
+        playDemoText: "You can play the DEMO version, or provide the original game files to play the full version.",
+        disclaimer: "DISCLAIMER:",
+        disclaimerSources: "This game is based on an open source version of GTA: Vice City. It is not a commercial release and is not affiliated with Rockstar Games.",
+        disclaimerCheckbox: "I own the original game",
+        disclaimerPrompt: "You need to provide a file from the original game to confirm ownership of the original game.",
+        cantContinuePlaying: "You can't continue playing in DEMO version. Please provide the original game files to continue playing.",
+        demoAlert: "The demo version is intended only for familiarizing yourself with the game technology. All features are available, but you won’t be able to progress through the game’s storyline. Please provide the original game files to launch the full version.",
+        downloading: "Downloading",
+        enterKey: "enter your key",
+        clickToContinue: "Click to continue...",
+        enterJsDosKey: "Enter js-dos key",
+        portBy: "HTML5 port by:",
+        ruTranslate: "",
     };
-
-    let currentLanguage = "en";
 
     window.t = function (key) {
         return translations[key];
@@ -103,9 +123,7 @@ var dataPromise = (async function loadData() {
     let chunks = [];
     while (true) {
         const { done, value } = await reader.read();
-        if (done) {
-            break;
-        }
+        if (done) break;
         chunks.push(value);
         receivedLength += value.length;
         if (typeof setStatus === "function") {
@@ -137,9 +155,7 @@ async function startGame() {
     dataPromise = null;
     spinnerElement.hidden = true;
     setStatus(t("clickToContinue"));
-    const clickHandler = () => {
-        loadGame(dataBuffer);
-    };
+    const clickHandler = () => loadGame(dataBuffer);
     if (isMobile) {
         window.addEventListener('pointerup', clickHandler, { once: true });
     } else {
@@ -153,7 +169,7 @@ function setStatus(text) {
         spinnerElement.hidden = true;
         return;
     }
-    const match = text.match(/(.+)\((\d+\.?\d*)\/(\d+)\)/);
+    const match = text.match(/(.+)\((\d+\.?.*?)\/(\d+)\)/);
     if (match) {
         const [current, total] = match.slice(2, 4).map(Number);
         const percent = (current / total * 100).toFixed(0);
@@ -163,9 +179,7 @@ function setStatus(text) {
         progressElement.hidden = false;
         spinnerElement.hidden = false;
         const progressBarFill = spinnerElement.querySelector('.progress-bar-fill');
-        if (progressBarFill) {
-            progressBarFill.style.width = percent + '%';
-        }
+        if (progressBarFill) progressBarFill.style.width = percent + '%';
     } else {
         statusElement.textContent = text;
     }
@@ -195,9 +209,7 @@ async function loadGame(data) {
         postRun: [],
         print: (...args) => console.log(args.join(' ')),
         printErr: (...args) => console.error(args.join(' ')),
-        getPreloadedPackage: () => {
-            return data.buffer;
-        },
+        getPreloadedPackage: () => data.buffer,
         canvas: function () {
             const canvas = document.getElementById('canvas');
             canvas.addEventListener('webglcontextlost', (e) => {
@@ -221,10 +233,7 @@ async function loadGame(data) {
         },
     };
     Module.log = Module.print;
-    Module.instantiateWasm = async (
-        info,
-        receiveInstance,
-    ) => {
+    Module.instantiateWasm = async (info, receiveInstance) => {
         const wasm = await (await fetch(wasm_content ? wasm_content : "index.wasm")).arrayBuffer();
         const module = await WebAssembly.instantiate(wasm, info);
         return receiveInstance(module.instance, module);
@@ -233,13 +242,9 @@ async function loadGame(data) {
         Module.setStatus(`Error: ${message}`);
         spinnerElement.hidden = true;
     };
-    Module.arguments = window.location.search
-        .slice(1)
-        .split('&')
-        .filter(Boolean)
-        .map(decodeURIComponent);
+    Module.arguments = window.location.search.slice(1).split('&').filter(Boolean).map(decodeURIComponent);
     window.onbeforeunload = function (event) {
-        event.preventDefault();
+        event.preventEvent();
         return '';
     };
 
@@ -248,25 +253,23 @@ async function loadGame(data) {
     script.async = true;
     script.src = 'index.js';
     document.body.appendChild(script);
-
     document.body.classList.add('gameIsStarted');
 
-    // Start later, because the game can take a while to enter the opening cutscene.
-    // Repeat briefly so Enter reaches the cutscene even after slow loading.
+    // Start after the loading/intro has time to begin, then tap and press Enter repeatedly.
     setTimeout(() => {
         let attempts = 0;
         const cutsceneSkipInterval = setInterval(() => {
             attempts += 1;
+            tapCanvasToSkipCutscene();
             pressEnterToSkipCutscene();
 
-            if (attempts >= 120) {
-                clearInterval(cutsceneSkipInterval);
-            }
+            if (attempts >= 120) clearInterval(cutsceneSkipInterval);
         }, 1000);
     }, 10000);
 
     const emulator = new GamepadEmulator();
-    const gamepad = emulator.AddEmulatedGamepad(null, true);
+    emulator.AddEmulatedGamepad(null, true);
+
     const gamepadEmulatorConfig = {
         directions: { up: true, down: true, left: true, right: true },
         dragDistance: 100,
@@ -279,6 +282,7 @@ async function loadGame(data) {
         invertY: false,
     };
     emulator.AddDisplayJoystickEventListeners(0, [gamepadEmulatorConfig]);
+
     const gamepadEmulatorConfig1 = {
         directions: { up: true, down: true, left: true, right: true },
         dragDistance: 100,
@@ -292,87 +296,37 @@ async function loadGame(data) {
     };
     emulator.AddDisplayJoystickEventListeners(0, [gamepadEmulatorConfig1]);
 
-    emulator.AddDisplayButtonEventListeners(0, [{
-        buttonIndex: 9,
-        lockTargetWhilePressed: false,
-        tapTarget: document.querySelector('.touch-control.menu'),
-    }]);
-    emulator.AddDisplayButtonEventListeners(0, [{
-        buttonIndex: 3,
-        lockTargetWhilePressed: false,
-        tapTarget: document.querySelector('.touch-control.car.getIn'),
-    }]);
-    emulator.AddDisplayButtonEventListeners(0, [{
-        buttonIndex: 0,
-        lockTargetWhilePressed: false,
-        tapTarget: document.querySelector('.touch-control.run'),
-    }]);
-    emulator.AddDisplayButtonEventListeners(0, [{
-        buttonIndex: 1,
-        lockTargetWhilePressed: false,
-        tapTarget: document.querySelector('.touch-control.fist'),
-    }]);
-    emulator.AddDisplayButtonEventListeners(0, [{
-        buttonIndex: 5,
-        lockTargetWhilePressed: false,
-        tapTarget: document.querySelector('.touch-control.drift'),
-    }]);
-    emulator.AddDisplayButtonEventListeners(0, [{
-        buttonIndex: 2,
-        lockTargetWhilePressed: false,
-        tapTarget: document.querySelector('.touch-control.jump'),
-    }]);
-    emulator.AddDisplayButtonEventListeners(0, [{
-        buttonIndex: 4,
-        lockTargetWhilePressed: false,
-        tapTarget: document.querySelector('.touch-control.mobile'),
-    }]);
-    emulator.AddDisplayButtonEventListeners(0, [{
-        buttonIndex: 11,
-        lockTargetWhilePressed: false,
-        tapTarget: document.querySelector('.touch-control.job'),
-    }]);
-    emulator.AddDisplayButtonEventListeners(0, [{
-        buttonIndex: 4,
-        lockTargetWhilePressed: false,
-        tapTarget: document.querySelector('.touch-control.radio'),
-    }]);
-    emulator.AddDisplayButtonEventListeners(0, [{
-        buttonIndex: 7,
-        lockTargetWhilePressed: false,
-        tapTarget: document.querySelector('.touch-control.weapon'),
-    }]);
-    emulator.AddDisplayButtonEventListeners(0, [{
-        buttonIndex: 8,
-        lockTargetWhilePressed: false,
-        tapTarget: document.querySelector('.touch-control.camera'),
-    }]);
-    emulator.AddDisplayButtonEventListeners(0, [{
-        buttonIndex: 10,
-        lockTargetWhilePressed: false,
-        tapTarget: document.querySelector('.touch-control.horn'),
-    }]);
-    emulator.AddDisplayButtonEventListeners(0, [{
-        buttonIndex: 7,
-        buttonIndexes: [1, 7],
-        lockTargetWhilePressed: false,
-        tapTarget: document.querySelector('.touch-control.fireRight'),
-    }]);
-    emulator.AddDisplayButtonEventListeners(0, [{
-        buttonIndex: 6,
-        buttonIndexes: [1, 6],
-        lockTargetWhilePressed: false,
-        tapTarget: document.querySelector('.touch-control.fireLeft'),
-    }]);
+    const buttonBindings = [
+        [9, '.touch-control.menu'],
+        [3, '.touch-control.car.getIn'],
+        [0, '.touch-control.run'],
+        [1, '.touch-control.fist'],
+        [5, '.touch-control.drift'],
+        [2, '.touch-control.jump'],
+        [4, '.touch-control.mobile'],
+        [11, '.touch-control.job'],
+        [4, '.touch-control.radio'],
+        [7, '.touch-control.weapon'],
+        [8, '.touch-control.camera'],
+        [10, '.touch-control.horn'],
+        [7, '.touch-control.fireRight'],
+        [6, '.touch-control.fireLeft'],
+    ];
+
+    buttonBindings.forEach(([buttonIndex, selector]) => {
+        emulator.AddDisplayButtonEventListeners(0, [{
+            buttonIndex,
+            lockTargetWhilePressed: false,
+            tapTarget: document.querySelector(selector),
+        }]);
+    });
 }
 
 startGame();
 if (!isMobile) {
     function lockMouseIfNeeded() {
         if (!document.pointerLockElement && typeof Module !== 'undefined' && Module.canvas) {
-            Module.canvas.requestPointerLock({
-                unadjustedMovement: true,
-            }).catch(() => {
+            Module.canvas.requestPointerLock({ unadjustedMovement: true }).catch(() => {
                 console.warn('Failed to lock in unadjusted movement mode');
                 Module.canvas.requestPointerLock().catch(() => {
                     console.error('Failed to lock in default mode');
