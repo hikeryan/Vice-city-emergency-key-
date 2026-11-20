@@ -396,7 +396,7 @@ RadarMode=0
 ShowLegends=0
 PedDensity=1.200000
 CarDensity=1.200000
-CutsceneBorders=1
+CutsceneBorders=0
 FreeCam=0
 [Graphics]
 AspectRatio=0
