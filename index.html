@@ -251,7 +251,7 @@ Promise.all([
         else if (url.toLowerCase().includes("VROCK.adf".toLowerCase())) url = VROCKadfurl;
         else if (url.toLowerCase().includes("WAVE.adf".toLowerCase())) url = WAVEadfurl;
         else if (url.toLowerCase().includes("WILD.adf".toLowerCase())) url = WILDadfurl;
-        return originalOpen.call(this, method, url.toLowerCase(), ...rest);
+       return originalOpen.call(this, method, url, ...rest);
     };
 
     // Load game scripts
