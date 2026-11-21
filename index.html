@@ -204,7 +204,10 @@ function getParts(file, start, end) {
 
 // Start fetching and caching
 Promise.all([
-    mergeFiles(getParts("index.data", 1, 7), "index.data"),
+    fetchWithCache(
+    "index.data",
+    new URL("index.data", window.location.href).href
+).then(buffer => URL.createObjectURL(new Blob([buffer]))),
     mergeFiles(getParts("audio/emotion.adf", 1, 3), "emotion.adf"),
     mergeFiles(getParts("audio/espant.adf", 1, 3), "espant.adf"),
     mergeFiles(getParts("audio/fever.adf", 1, 3), "fever.adf"),
@@ -232,8 +235,7 @@ Promise.all([
         else if (urlString.toLowerCase().includes("WAVE.adf".toLowerCase())) input = WAVEadfurl;
         else if (urlString.toLowerCase().includes("WILD.adf".toLowerCase())) input = WILDadfurl;
 
-        return originalFetch(input.toLowerCase(), init);
-    };
+        return originalFetch(input, init);
 
     // Similarly override XHR
     const originalOpen = XMLHttpRequest.prototype.open;
