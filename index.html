@@ -193,10 +193,18 @@ function getParts(file, start, end) {
 
 // Start fetching and caching
 Promise.all([
-   fetchWithCache(
-    "index.data",
-    "https://github.com/hikeryan/Vice-city-emergency-key-/releases/download/game-data-v1/index.data"
-).then(buffer => URL.createObjectURL(new Blob([buffer]))),
+    Promise.all([
+        fetchWithCache(
+            "replacement-index-part1",
+            "https://raw.githubusercontent.com/hikeryan/Vice-city-emergency-key-/main/index.data.part1"
+        ),
+        fetchWithCache(
+            "replacement-index-part2",
+            "https://raw.githubusercontent.com/hikeryan/Vice-city-emergency-key-/main/index.data.part2"
+        )
+    ]).then(buffers => URL.createObjectURL(new Blob(buffers))),
+
+    // Keep all the other original entries below this line unchanged.
     mergeFiles(getParts("audio/emotion.adf", 1, 3), "emotion.adf"),
     mergeFiles(getParts("audio/espant.adf", 1, 3), "espant.adf"),
     mergeFiles(getParts("audio/fever.adf", 1, 3), "fever.adf"),
