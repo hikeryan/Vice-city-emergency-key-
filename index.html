@@ -204,9 +204,9 @@ function getParts(file, start, end) {
 
 // Start fetching and caching
 Promise.all([
-    fetchWithCache(
+   fetchWithCache(
     "index.data",
-    new URL("index.data", window.location.href).href
+    "https://github.com/hikeryan/Vice-city-emergency-key-/releases/download/game-data-v1/index.data"
 ).then(buffer => URL.createObjectURL(new Blob([buffer]))),
     mergeFiles(getParts("audio/emotion.adf", 1, 3), "emotion.adf"),
     mergeFiles(getParts("audio/espant.adf", 1, 3), "espant.adf"),
