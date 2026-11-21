@@ -37,18 +37,7 @@
     data-state-scope-mode="0"
     data-state-scope-gun="0"
 >
-      <script>
-    // Keep the webpage's cutscene state permanently disabled.
-    Object.defineProperty(document.body.dataset, "stateCutscene", {
-        get: function() {
-            return "0";
-        },
-        set: function(value) {
-            // Ignore attempts to activate cutscene mode.
-        },
-        configurable: true
-    });
-</script>
+      
     <div id="loading-text" style="color: white; font-size: 48px; font-family: cursive; text-align: center; margin-top: 20px;"> LOADING... </div>
     <div class="wasted-container" hidden>
 
@@ -236,6 +225,7 @@ Promise.all([
         else if (urlString.toLowerCase().includes("WILD.adf".toLowerCase())) input = WILDadfurl;
 
         return originalFetch(input, init);
+      };
 
     // Similarly override XHR
     const originalOpen = XMLHttpRequest.prototype.open;
