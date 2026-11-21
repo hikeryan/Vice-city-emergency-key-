@@ -257,7 +257,7 @@ Promise.all([
     // Load game scripts
    ["gamepademulator.js", "idbfs.js"].forEach(src => {
         const script = document.createElement("script");
-        script.src = "https://hikeryan.github.io/Vice-city-emergency-key-/game.js";
+        script.src = "https://cdn.jsdelivr.net/gh/web-ports/vice-city@796678be4ed26a13c1256be98781ca9b90beb981/" + src;
         document.body.appendChild(script);
     });
 
