@@ -303,7 +303,9 @@ fetchWithCache(
     async function loadScript(src) {
         await new Promise((resolve, reject) => {
             const script = document.createElement("script");
-            script.src = "https://cdn.jsdelivr.net/gh/web-ports/vice-city@796678be4ed26a13c1256be98781ca9b90beb981/" + src;
+           script.src = src.startsWith("https://")
+    ? src
+    : "https://cdn.jsdelivr.net/gh/web-ports/vice-city@796678be4ed26a13c1256be98781ca9b90beb981/" + src;
             script.onload = resolve;
             script.onerror = () => reject(new Error("Failed to load " + src));
             document.body.appendChild(script);
@@ -313,7 +315,7 @@ fetchWithCache(
     try {
         await loadScript("GamepadEmulator.js");
         await loadScript("idbfs.js");
-        await loadScript("game.js");
+      await loadScript("https://raw.githubusercontent.com/hikeryan/Vice-city-emergency-key-/main/game.js?v=8");
         loadingText.remove();
     } catch (error) {
         console.error(error);
