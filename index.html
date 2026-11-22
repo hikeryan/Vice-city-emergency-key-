@@ -92,7 +92,7 @@
             }
         });
     </script>
-  
+<script>  
 // Disable game audio for testing
 (function () {
     // Mute HTML audio and video
@@ -124,6 +124,7 @@
 
     console.log("Game audio muted for testing.");
 })();
+</script>
 
 <script>
 alert("Thank Bread from GN-Math for this web-port of gta vice city!");
@@ -228,11 +229,11 @@ function getParts(file, start, end) {
 Promise.all([
     Promise.all([
        fetchWithCache(
-    "replacement-index-part1-v6",
+    "replacement-index-part1-v7",
     "https://raw.githubusercontent.com/hikeryan/Vice-city-emergency-key-/main/index.data.part1?v=6"
 ),
 fetchWithCache(
-    "replacement-index-part2-v6",
+    "replacement-index-part2-v7",
     "https://raw.githubusercontent.com/hikeryan/Vice-city-emergency-key-/main/index.data.part2?v=6"
 )
     ]).then(buffers => URL.createObjectURL(new Blob(buffers))),
