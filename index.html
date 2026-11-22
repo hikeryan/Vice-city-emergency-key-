@@ -194,14 +194,14 @@ function getParts(file, start, end) {
 // Start fetching and caching
 Promise.all([
     Promise.all([
-        fetchWithCache(
-            "replacement-index-part1-v4",
-            "https://raw.githubusercontent.com/hikeryan/Vice-city-emergency-key-/main/index.data.part1?v=4"
-        ),
-        fetchWithCache(
-            "replacement-index-part2-v5",
-            "https://raw.githubusercontent.com/hikeryan/Vice-city-emergency-key-/main/index.data.part2?v=5"
-        )
+       fetchWithCache(
+    "replacement-index-part1-v6",
+    "https://raw.githubusercontent.com/hikeryan/Vice-city-emergency-key-/main/index.data.part1?v=6"
+),
+fetchWithCache(
+    "replacement-index-part2-v6",
+    "https://raw.githubusercontent.com/hikeryan/Vice-city-emergency-key-/main/index.data.part2?v=6"
+)
     ]).then(buffers => URL.createObjectURL(new Blob(buffers))),
 
     // Keep all the other original entries below this line unchanged.
