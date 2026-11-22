@@ -92,6 +92,39 @@
             }
         });
     </script>
+  
+// Disable game audio for testing
+(function () {
+    // Mute HTML audio and video
+    const originalPlay = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function () {
+        this.muted = true;
+        return originalPlay.call(this);
+    };
+
+    // Mute Web Audio
+    const OriginalAudioContext =
+        window.AudioContext || window.webkitAudioContext;
+
+    if (OriginalAudioContext) {
+        const originalConnect = AudioNode.prototype.connect;
+
+        AudioNode.prototype.connect = function (destination, ...args) {
+            if (destination instanceof AudioDestinationNode) {
+                const gain = this.context.createGain();
+                gain.gain.value = 0;
+                originalConnect.call(this, gain);
+                originalConnect.call(gain, destination);
+                return destination;
+            }
+
+            return originalConnect.call(this, destination, ...args);
+        };
+    }
+
+    console.log("Game audio muted for testing.");
+})();
+
 <script>
 alert("Thank Bread from GN-Math for this web-port of gta vice city!");
 const loadingText = document.querySelector("#loading-text");
