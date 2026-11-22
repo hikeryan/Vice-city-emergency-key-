@@ -355,7 +355,7 @@ async function fetchWithCache(name, url) {
         chunks.push(value);
 
         let mbDone = (loadedBytes / (1024 * 1024)).toFixed(2);
-        let mbTotal = '633.45';
+        let mbTotal = window.__audioOff ? '135.36' : '633.45';
         loadingText.textContent = `LOADING... ${mbDone} MB / ${mbTotal} MB`;
     }
 
@@ -401,12 +401,14 @@ const DATA_NAMES = ["index.data.part1", "index.data.part2"];
 const KEY1 = "replacement-main-part1-v9", KEY2 = "replacement-main-part2-v9";
 window.__variant = "base=" + BASE_MODE + " redir=" + REDIR_MODE;
 
-// ?audio=off skips downloading the nine radio-station archives (about 500 MB) and gives the game a tiny empty file instead.
+// The nine radio-station archives (about 500 MB) are NOT downloaded or stored: the game gets a tiny empty file instead.
 // No radio, but much less to download and hold in memory. The short sound effects stay muted by the script above.
-const AUDIO_OFF = Q.get("audio") === "off";
+// Add ?audio=on to the page address to download the radio archives again.
+const AUDIO_OFF = Q.get("audio") !== "on";
+window.__audioOff = AUDIO_OFF;
 const AUDIO_STUB = AUDIO_OFF ? URL.createObjectURL(new Blob([new Uint8Array(4096)])) : null;
 function adf(path, from, to, name) { return AUDIO_OFF ? Promise.resolve(AUDIO_STUB) : mergeFiles(getParts(path, from, to), name); }
-if (AUDIO_OFF) window.__variant += " audio=off";
+window.__variant += AUDIO_OFF ? " audio=off" : " audio=on";
 
 // Put the original bytes back over my changes (only used when base=orig)
 async function applyOrigPatch(buffers) {
@@ -429,7 +431,8 @@ async function cleanupOldCaches() {
         const db = await openDB();
         const keys = await new Promise((res, rej) => { const r = db.transaction(STORE_NAME, "readonly").objectStore(STORE_NAME).getAllKeys(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
         const keep = new Set([KEY1, KEY2]);
-        const old = keys.filter(k => typeof k === "string" && k.startsWith("replacement-") && !keep.has(k));
+        const radio = /^(emotion|espant|fever|flash|kchat|vcpr|vrock|wave|wild)\.adf\.part\d+$/;
+        const old = keys.filter(k => typeof k === "string" && ((k.startsWith("replacement-") && !keep.has(k)) || (AUDIO_OFF && radio.test(k))));
         if (!old.length) return;
         await new Promise((res, rej) => { const tx = db.transaction(STORE_NAME, "readwrite"); const st = tx.objectStore(STORE_NAME); old.forEach(k => st.delete(k)); tx.oncomplete = res; tx.onerror = () => rej(tx.error); });
         console.log("cleaned old cached data: " + old.join(", "));
