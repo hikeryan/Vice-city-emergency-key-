@@ -430,12 +430,16 @@ const revc_ini = (() => {
         }
     };
 
-    setIniValue('General', 'NoMovies', '0');
+     setIniValue('General', 'NoMovies', '0');
     setIniValue('Audio', 'SfxVolume', '0');
     setIniValue('Audio', 'MusicVolume', '0');
     setIniValue('Audio', 'MP3BoostVolume', '0');
     setIniValue('Audio', 'Radio', '0');
     setIniValue('Audio', 'DynamicAcoustics', '0');
+
+    // Force compatible graphics setting.
+    // Overrides previously saved settings.
+    setIniValue('Graphics', 'PS2AlphaTest', '0');
 
     return config;
 })();
