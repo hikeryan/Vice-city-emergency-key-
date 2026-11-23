@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en-us">
+
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LM67KGEJRK"></script>
+<script>
+// Always start with PS2 alpha test OFF (turning it on makes the screen go black on this computer).
+// Add ?alphatest=on to the page address to skip this and use the normal setting.
+(function () {
+    try {
+        if (new URLSearchParams(location.search).get("alphatest") === "on") return;
+        const IS_TOUCH = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) && window.matchMedia("(pointer: coarse)").matches;
+        const KEY = "vcsky.revc.ini";
+        let ini = localStorage.getItem(KEY);
+        if (!ini) ini = `
+[VideoMode]
+Width=800
+Height=600
+Depth=32
+Subsystem=0
+Windowed=0
+[Controller]
+HeadBob1stPerson=0
+HorizantalMouseSens=0.002500
+InvertMouseVertically=1
+DisableMouseSteering=1
+Vibration=0
+Method=${IS_TOUCH ? '1' : '0'}
+InvertPad=0
+JoystickName=
+PadButtonsInited=0
+[Audio]
+SfxVolume=0
+MusicVolume=0
+MP3BoostVolume=0
+Radio=0
+SpeakerType=0
+Provider=0
+DynamicAcoustics=0
+[Display]
+Brightness=256
+DrawDistance=1.800000
+Subtitles=0
+ShowHud=1
+RadarMode=0
+ShowLegends=0
+PedDensity=1.200000
+CarDensity=1.200000
+CutsceneBorders=0
+FreeCam=0
+[Graphics]
+AspectRatio=0
+VSync=1
+Trails=1
+FrameLimiter=0
+MultiSampling=0
+IslandLoading=0
+PS2AlphaTest=1
+ColourFilter=2
+MotionBlur=0
+VehiclePipeline=0
+NeoRimLight=0
+NeoLightMaps=0
+NeoRoadGloss=0
+[General]
+SkinFile=$$""
+Language=0
+DrawVersionText=0
+NoMovies=1
+[CustomPipesValues]
+PostFXIntensity=1.000000
+NeoVehicleShininess=1.000000
+NeoVehicleSpecularity=1.000000
+RimlightMult=1.000000
+LightmapMult=1.000000
+GlossMult=1.000000
+[Rendering]
+BackfaceCulling=1
+NewRenderer=1
+[Draw]
+ProperScaling=1
+FixRadar=1
+FixSprites=1
+[Bindings]
+PED_FIREWEAPON=mouse:LEFT,2ndKbd:PAD5
+PED_CYCLE_WEAPON_RIGHT=2ndKbd:PADENTER,mouse:WHLDOWN,kbd:E
+PED_CYCLE_WEAPON_LEFT=kbd:PADDEL,mouse:WHLUP,2ndKbd:Q
+GO_FORWARD=kbd:UP,2ndKbd:W
+GO_BACK=kbd:DOWN,2ndKbd:S
+GO_LEFT=2ndKbd:A,kbd:LEFT
+GO_RIGHT=kbd:RIGHT,2ndKbd:D
+PED_SNIPER_ZOOM_IN=kbd:PGUP,2ndKbd:Z,mouse:WHLUP
+PED_SNIPER_ZOOM_OUT=kbd:PGDN,2ndKbd:X,mouse:WHLDOWN
+VEHICLE_ENTER_EXIT=kbd:ENTER,2ndKbd:F
+CAMERA_CHANGE_VIEW_ALL_SITUATIONS=kbd:HOME,2ndKbd:V
+PED_JUMPING=kbd:RCTRL,2ndKbd:SPC
+PED_SPRINT=2ndKbd:LSHIFT,kbd:RSHIFT
+PED_LOOKBEHIND=2ndKbd:CAPSLK,mouse:MIDDLE,kbd:PADINS
+PED_DUCK=kbd:C
+PED_ANSWER_PHONE=kbd:TAB
+VEHICLE_FIREWEAPON=kbd:PADINS,2ndKbd:LCTRL,mouse:LEFT
+VEHICLE_ACCELERATE=2ndKbd:W
+VEHICLE_BRAKE=2ndKbd:S
+VEHICLE_CHANGE_RADIO_STATION=kbd:INS,2ndKbd:R
+VEHICLE_HORN=2ndKbd:LSHIFT,kbd:RSHIFT
+TOGGLE_SUBMISSIONS=kbd:PLUS,2ndKbd:CAPSLK
+VEHICLE_HANDBRAKE=kbd:RCTRL,2ndKbd:SPC,mouse:RIGHT
+PED_1RST_PERSON_LOOK_LEFT=kbd:PADLEFT
+PED_1RST_PERSON_LOOK_RIGHT=kbd:PADHOME
+VEHICLE_LOOKLEFT=kbd:PADEND,2ndKbd:Q
+VEHICLE_LOOKRIGHT=kbd:PADDOWN,2ndKbd:E
+VEHICLE_LOOKBEHIND=mouse:MIDDLE
+VEHICLE_TURRETLEFT=kbd:PADLEFT
+VEHICLE_TURRETRIGHT=kbd:PAD5
+VEHICLE_TURRETUP=kbd:PADPGUP,2ndKbd:UP
+VEHICLE_TURRETDOWN=kbd:PADRIGHT,2ndKbd:DOWN
+PED_CYCLE_TARGET_LEFT=kbd:[,2ndKbd:PADEND
+PED_CYCLE_TARGET_RIGHT=2ndKbd:],kbd:PADDOWN
+PED_CENTER_CAMERA_BEHIND_PLAYER=kbd:#
+PED_LOCK_TARGET=kbd:DEL,mouse:RIGHT,2ndKbd:PADRIGHT
+NETWORK_TALK=kbd:T
+PED_1RST_PERSON_LOOK_UP=kbd:PADPGUP
+PED_1RST_PERSON_LOOK_DOWN=kbd:PADUP
+_CONTROLLERACTION_36=
+TOGGLE_DPAD=
+SWITCH_DEBUG_CAM_ON=
+TAKE_SCREEN_SHOT=
+SHOW_MOUSE_POINTER_TOGGLE=
+UNKNOWN_ACTION=
+
+`;
+        if (/^PS2AlphaTest=.*$/mi.test(ini)) ini = ini.replace(/^PS2AlphaTest=.*$/mi, "PS2AlphaTest=0");
+        else if (/\[Graphics\]/i.test(ini)) ini = ini.replace(/(\[Graphics\][^\n]*\n)/i, "$1PS2AlphaTest=0\n");
+        else ini += "\n[Graphics]\nPS2AlphaTest=0\n";
+        localStorage.setItem(KEY, ini);
+        console.log("PS2 alpha test forced OFF");
+    } catch (e) { console.log("could not set PS2 alpha test", e); }
+})();
+</script>
+<script>
+// Crash reporter: if the game crashes, show the failed files and the last messages on screen.
+(function () {
+    const ring = [], failed = new Set();
+    const origLog = console.log;
+    console.log = function (...a) {
+        try { ring.push(a.join(" ").slice(0, 150)); if (ring.length > 25) ring.shift(); } catch (e) {}
+        return origLog.apply(console, a);
+    };
+    const oOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function (m, u, ...r) {
+        const url = String(u);
+        this.addEventListener("loadend", () => {
+            try { if (this.status === 0 || this.status >= 400) failed.add(this.status + " " + url.slice(0, 130)); } catch (e) {}
+        });
+        return oOpen.call(this, m, u, ...r);
+    };
+    function show(msg) {
+        if (document.getElementById("crashlog")) return;
+        const d = document.createElement("pre");
+        d.id = "crashlog";
+        d.style.cssText = "position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;margin:0;padding:12px;background:#000;color:#fff;font:12px monospace;white-space:pre-wrap;overflow:auto";
+        d.textContent = "CRASH REPORT - take a photo of this screen\nTest variant: " + (window.__variant || "?") + "\n" + msg + "\n\nFAILED FILES (last 20):\n" + [...failed].slice(-20).join("\n") + "\n\nLAST MESSAGES:\n" + ring.join("\n") + "\n\n(tap to close)";
+        d.onclick = () => d.remove();
+        document.body.appendChild(d);
+    }
+    window.addEventListener("error", e => { const m = String(e.message || e); if (/RuntimeError|out of bounds|unreachable|abort/i.test(m)) show(m); });
+    document.addEventListener("webglcontextlost", () => show("WebGL context lost (the graphics driver dropped the game screen)"), true);
+    window.addEventListener("unhandledrejection", e => { const m = String(e.reason); if (/RuntimeError|out of bounds|unreachable|abort/i.test(m)) show(m); });
+})();
+</script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LM67KGEJRK');
+</script>
+
+    <base href="https://cdn.jsdelivr.net/gh/web-ports/vice-city@796678be4ed26a13c1256be98781ca9b90beb981/">
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+    <title>University of Adelaide</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body
+    data-is-touch="0"
+    data-state-car="0"
+    data-state-car-gun="0"
+    data-state-gun="0"
+    data-state-bike="0"
+    data-state-menu="1"
+    data-state-cutscene="0"
+    data-state-mobring="0"
+    data-state-job="0"
+    data-state-disable-controls="0"
+    data-state-panzer="0"
+    data-state-car-with-weapon="0"
+    data-state-hunter="0"
+    data-state-scope-mode="0"
+    data-state-scope-gun="0"
+>
+      
+    <div id="loading-text" style="color: white; font-size: 48px; font-family: cursive; text-align: center; margin-top: 20px;"> LOADING... </div>
+    <div class="wasted-container" hidden>
+
+    </div>
+    <div class="intro-container" hidden>
+        </video>
+
+        <div class="loader-container">
+            <div class="progress-bar-container" id='spinner'>
+                <div class="progress-bar-fill"></div>
+            </div>
+            <div id="status">Downloading...</div>
+            <div>
+                <progress id="progress"></progress>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="original-game-file" hidden>
+
+
+    <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+
+    <div class="touch-controls-wrapper">
+        <div id="move"></div>
+        <div id="look"></div>
+
+        <div class="touch-control radio"></div>
+        <div class="touch-control weapon"></div>
+        <div class="touch-control menu"></div>
+        <div class="touch-control fist"></div>
+        <div class="touch-control drift"></div>
+        <div class="touch-control run"></div>
+        <div class="touch-control car getIn"></div>
+        <div class="touch-control left"></div>
+        <div class="touch-control right"></div>
+        <div class="touch-control jump"></div>
+        <div class="touch-control car getOut"></div>
+        <div class="touch-control camera"></div>
+        <div class="touch-control mobile"></div>
+        <div class="touch-control job"></div>
+        <div class="touch-control horn"></div>
+        <div class="touch-control fireRight"></div>
+        <div class="touch-control fireLeft"></div>
+    </div>
+
+    <script>
+        // Press the backtick (`) key to open the emergency link.
+        document.addEventListener("keydown", event => {
+            if (event.code === "Backquote" || event.key === "`") {
+                window.location.href = "https://hikeryan.github.io/polytrack-/0.5.0/index.html";
+            }
+        });
+    </script>
+<script>  
+// Disable game audio for testing
+(function () {
+    // Mute HTML audio and video
+    const originalPlay = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function () {
+        this.muted = true;
+        return originalPlay.call(this);
+    };
+
+    // Mute Web Audio
+    const OriginalAudioContext =
+        window.AudioContext || window.webkitAudioContext;
+
+    if (OriginalAudioContext) {
+        const originalConnect = AudioNode.prototype.connect;
+
+        AudioNode.prototype.connect = function (destination, ...args) {
+            if (destination instanceof AudioDestinationNode) {
+                const gain = this.context.createGain();
+                gain.gain.value = 0;
+                originalConnect.call(this, gain);
+                originalConnect.call(gain, destination);
+                return destination;
+            }
+
+            return originalConnect.call(this, destination, ...args);
+        };
+    }
+
+    console.log("Game audio muted for testing.");
+})();
+</script>
+
+<script>
+alert("Thank Bread from GN-Math for this web-port of gta vice city!");
+const loadingText = document.querySelector("#loading-text");
+let loadedBytes = 0;
+const DB_NAME = "gameFilesDB";
+const STORE_NAME = "files";
+
+// Open or create IndexedDB
+function openDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, 1);
+        request.onupgradeneeded = e => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME);
+            }
+        };
+        request.onsuccess = e => resolve(e.target.result);
+        request.onerror = e => reject(e.target.error);
+    });
+}
+
+// Save file to IndexedDB
+async function saveFile(name, buffer) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, "readwrite");
+        const store = tx.objectStore(STORE_NAME);
+        store.put(buffer, name);
+        tx.oncomplete = () => resolve();
+        tx.onerror = e => reject(e.target.error);
+    });
+}
+
+// Get file from IndexedDB
+async function getFile(name) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, "readonly");
+        const store = tx.objectStore(STORE_NAME);
+        const request = store.get(name);
+        request.onsuccess = e => resolve(e.target.result);
+        request.onerror = e => reject(e.target.error);
+    });
+}
+
+// Fetch with progress and caching
+async function fetchWithCache(name, url) {
+    let cached = await getFile(name);
+    if (cached) return cached; // Return cached version
+
+    const response = await fetch(url);
+    const reader = response.body.getReader();
+    let chunks = [];
+    let received = 0;
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        received += value.length;
+        loadedBytes += value.length;
+        chunks.push(value);
+
+        let mbDone = (loadedBytes / (1024 * 1024)).toFixed(2);
+        let mbTotal = window.__audioOff ? '135.36' : '633.45';
+        loadingText.textContent = `LOADING... ${mbDone} MB / ${mbTotal} MB`;
+    }
+
+    let fullBuffer = new Uint8Array(received);
+    let offset = 0;
+    for (let chunk of chunks) {
+        fullBuffer.set(chunk, offset);
+        offset += chunk.length;
+    }
+
+    await saveFile(name, fullBuffer.buffer); // Cache it
+    return fullBuffer.buffer;
+}
+
+// Merge multiple parts
+async function mergeFiles(fileParts, namePrefix) {
+    const buffers = [];
+    for (let i = 0; i < fileParts.length; i++) {
+        const buffer = await fetchWithCache(`${namePrefix}.part${i+1}`, fileParts[i]);
+        buffers.push(buffer);
+    }
+    const mergedBlob = new Blob(buffers);
+    return URL.createObjectURL(mergedBlob);
+}
+
+// Generate part URLs
+function getParts(file, start, end) {
+    let parts = [];
+    for (let i = start; i <= end; i++) {
+        parts.push(file + ".part" + i);
+    }
+    return parts;
+}
+
+// ---- Test switches: add them to the page address, e.g. ?base=orig&redir=none ----
+//  base=orig  -> undo my changes to the game data (blood + swapped models) in memory, using orig_patch.bin
+//  redir=all|none|npc|particle -> which of my file redirects are active
+const Q = new URLSearchParams(location.search);
+const BASE_MODE = Q.get("base") === "orig" ? "orig" : "mine";
+const REDIR_MODE = ["all", "none", "npc", "particle"].includes(Q.get("redir")) ? Q.get("redir") : "all";
+const REPO = "https://raw.githubusercontent.com/hikeryan/Vice-city-emergency-key-/main/";
+const DATA_NAMES = ["index.data.part1", "index.data.part2"];
+const KEY1 = "replacement-main-part1-v9", KEY2 = "replacement-main-part2-v9";
+window.__variant = "base=" + BASE_MODE + " redir=" + REDIR_MODE;
+
+// The nine radio-station archives (about 500 MB) are NOT downloaded or stored: the game gets a tiny empty file instead.
+// No radio, but much less to download and hold in memory. The short sound effects stay muted by the script above.
+// Add ?audio=on to the page address to download the radio archives again.
+const AUDIO_OFF = Q.get("audio") !== "on";
+window.__audioOff = AUDIO_OFF;
+const AUDIO_STUB = AUDIO_OFF ? URL.createObjectURL(new Blob([new Uint8Array(4096)])) : null;
+function adf(path, from, to, name) { return AUDIO_OFF ? Promise.resolve(AUDIO_STUB) : mergeFiles(getParts(path, from, to), name); }
+window.__variant += AUDIO_OFF ? " audio=off" : " audio=on";
+
+// The sound effects are hundreds of small files that the game keeps in memory. By default every audio .mp3 request
+// is answered with one tiny silent clip (built in below), so almost nothing is downloaded or kept. Add ?sfx=on to get the real sounds back.
+const SFX_OFF = Q.get("sfx") !== "on";
+window.__variant += SFX_OFF ? " sfx=off" : " sfx=on";
+const SILENT_MP3_B64 = "SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYwLjE2LjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAANAAAGBAAvLy8vLy8vQEBAQEBAQEBSUlJSUlJSUmNjY2NjY2N1dXV1dXV1dYaGhoaGhoaGl5eXl5eXl6mpqampqampurq6urq6urrLy8vLy8vL3d3d3d3d3d3u7u7u7u7u7v////////8AAAAATGF2YzYwLjMxAAAAAAAAAAAAAAAAJASSAAAAAAAABgRY2NC4AAAAAAD/+xDEAAPAAAGkAAAAIAAANIAAAARMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMuMTAwVf/7EsQpg8AAAaQAAAAgAAA0gAAABFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMuMTAwVf/7EMRTg8AAAaQAAAAgAAA0gAAABFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy4xMDBV//sSxH0DwAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy4xMDBV//sQxKcDwAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFX/+xLE0IPAAAGkAAAAIAAANIAAAARVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFX/+xDE1gPAAAGkAAAAIAAANIAAAARVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMuMTAwVf/7EsTVg8AAAaQAAAAgAAA0gAAABFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/7EMTWA8AAAaQAAAAgAAA0gAAABFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sSxNWDwAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQxNYDwAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/+xLE1YPAAAGkAAAAIAAANIAAAARVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/+xDE1gPAAAGkAAAAIAAANIAAAARVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVQ==";
+const SILENT_URL = SFX_OFF ? URL.createObjectURL(new Blob([Uint8Array.from(atob(SILENT_MP3_B64), c => c.charCodeAt(0))], { type: "audio/mpeg" })) : null;
+
+// Put the original bytes back over my changes (only used when base=orig)
+async function applyOrigPatch(buffers) {
+    const r = await fetch(REPO + "orig_patch.bin?v=1");
+    if (!r.ok) throw new Error("orig_patch.bin not found in the repo (" + r.status + ")");
+    const pb = new Uint8Array(await r.arrayBuffer()), dv = new DataView(pb.buffer);
+    const u1 = new Uint8Array(buffers[0]), u2 = new Uint8Array(buffers[1]), S1 = u1.length;
+    let p = 0;
+    while (p < pb.length) {
+        const off = dv.getUint32(p, true), len = dv.getUint32(p + 4, true); p += 8;
+        for (let i = 0; i < len; i++) { const o = off + i; if (o < S1) u1[o] = pb[p + i]; else u2[o - S1] = pb[p + i]; }
+        p += len;
+    }
+    console.log("base=orig: my data changes undone in memory");
+}
+
+// Delete old cached copies from earlier versions so they do not pile up in the browser
+async function cleanupOldCaches() {
+    try {
+        const db = await openDB();
+        const keys = await new Promise((res, rej) => { const r = db.transaction(STORE_NAME, "readonly").objectStore(STORE_NAME).getAllKeys(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+        const keep = new Set([KEY1, KEY2]);
+        const radio = /^(emotion|espant|fever|flash|kchat|vcpr|vrock|wave|wild)\.adf\.part\d+$/;
+        const old = keys.filter(k => typeof k === "string" && ((k.startsWith("replacement-") && !keep.has(k)) || (AUDIO_OFF && radio.test(k))));
+        if (!old.length) return;
+        await new Promise((res, rej) => { const tx = db.transaction(STORE_NAME, "readwrite"); const st = tx.objectStore(STORE_NAME); old.forEach(k => st.delete(k)); tx.oncomplete = res; tx.onerror = () => rej(tx.error); });
+        console.log("cleaned old cached data: " + old.join(", "));
+    } catch (e) { console.log("cache cleanup skipped", e); }
+}
+cleanupOldCaches();
+
+// Start fetching and caching
+Promise.all([
+    Promise.all([
+       fetchWithCache(
+    KEY1,
+    REPO + DATA_NAMES[0] + "?v=9"
+),
+fetchWithCache(
+    KEY2,
+    REPO + DATA_NAMES[1] + "?v=9"
+)
+    ]).then(async buffers => { if (BASE_MODE === "orig") await applyOrigPatch(buffers); return URL.createObjectURL(new Blob(buffers)); }),
+
+    // Keep all the other original entries below this line unchanged.
+    adf("audio/emotion.adf", 1, 3, "emotion.adf"),
+    adf("audio/espant.adf", 1, 3, "espant.adf"),
+    adf("audio/fever.adf", 1, 3, "fever.adf"),
+    adf("audio/flash.adf", 1, 3, "flash.adf"),
+    adf("audio/kchat.adf", 1, 3, "kchat.adf"),
+    adf("audio/vcpr.adf", 1, 2, "vcpr.adf"),
+    adf("audio/vrock.adf", 1, 4, "vrock.adf"),
+    adf("audio/wave.adf", 1, 4, "wave.adf"),
+    adf("audio/wild.adf", 1, 4, "wild.adf"),
+]).then(async ([indexdataurl, EMOTIONadfurl, ESPANTadfurl, FEVERadfurl, FLASHadfurl, KCHATadfurl, VCPRadfurl, VROCKadfurl, WAVEadfurl, WILDadfurl]) => {
+    
+    // Override fetch to use cached URLs
+    // Backup redirect: serve the replacement models from this repo's /models folder
+    const MODEL_BASE = "https://raw.githubusercontent.com/hikeryan/Vice-city-emergency-key-/main/models/";
+    const NPC_FILES = ["hfypr.dff", "hfypr.txd", "bfypr.dff", "bfypr.txd", "wfypr.dff", "wfypr.txd"];
+    const PARTICLE_FILES = ["particle.txd"];
+    const MODEL_FILES = REDIR_MODE === "none" ? [] : REDIR_MODE === "npc" ? NPC_FILES : REDIR_MODE === "particle" ? PARTICLE_FILES : NPC_FILES.concat(PARTICLE_FILES);
+    function modelRedirect(u) {
+        const low = String(u).toLowerCase().split("?")[0];
+        // water.mp3 is missing on every server, which makes the game retry forever and crash, so serve our own copy
+        if (/audio[\\\/]water\.mp3$/.test(low)) return "https://raw.githubusercontent.com/hikeryan/Vice-city-emergency-key-/main/audio/water.mp3?v=6";
+        const name = low.substring(low.lastIndexOf("/") + 1);
+        if (SFX_OFF && /audio[\\\/].*\.mp3$/.test(low)) return SILENT_URL;
+        return MODEL_FILES.includes(name) ? MODEL_BASE + name + "?v=9" : null;
+    }
+
+    const originalFetch = window.fetch;
+    window.fetch = async function(input, init) {
+        let urlString = input instanceof Request ? input.url : String(input);
+        { const r = modelRedirect(urlString); if (r) return originalFetch(r, init); }
+
+        if (urlString.toLowerCase().includes("index.data".toLowerCase())) input = indexdataurl;
+        else if (urlString.toLowerCase().includes("emotion.adf".toLowerCase())) input = EMOTIONadfurl;
+        else if (urlString.toLowerCase().includes("espant.adf".toLowerCase())) input = ESPANTadfurl;
+        else if (urlString.toLowerCase().includes("fever.adf".toLowerCase())) input = FEVERadfurl;
+        else if (urlString.toLowerCase().includes("flash.adf".toLowerCase())) input = FLASHadfurl;
+        else if (urlString.toLowerCase().includes("kchat.adf".toLowerCase())) input = KCHATadfurl;
+        else if (urlString.toLowerCase().includes("VCPR.adf".toLowerCase())) input = VCPRadfurl;
+        else if (urlString.toLowerCase().includes("VROCK.adf".toLowerCase())) input = VROCKadfurl;
+        else if (urlString.toLowerCase().includes("WAVE.adf".toLowerCase())) input = WAVEadfurl;
+        else if (urlString.toLowerCase().includes("WILD.adf".toLowerCase())) input = WILDadfurl;
+
+        return originalFetch(input, init);
+      };
+
+    // Similarly override XHR
+    const originalOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function(method, url, ...rest) {
+        { const r = modelRedirect(url); if (r) return originalOpen.call(this, method, r, ...rest); }
+        if (url.includes("https://cdn.dos.zone/vcsky/fetched/".toLowerCase())) url = url.replace("https://cdn.dos.zone/vcsky/fetched/", "")
+        if (url.toLowerCase().includes("index.data".toLowerCase())) url = indexdataurl;
+        else if (url.toLowerCase().includes("emotion.adf".toLowerCase())) url = EMOTIONadfurl;
+        else if (url.toLowerCase().includes("espant.adf".toLowerCase())) url = ESPANTadfurl;
+        else if (url.toLowerCase().includes("fever.adf".toLowerCase())) url = FEVERadfurl;
+        else if (url.toLowerCase().includes("flash.adf".toLowerCase())) url = FLASHadfurl;
+        else if (url.toLowerCase().includes("KCHAT.adf".toLowerCase())) url = KCHATadfurl;
+        else if (url.toLowerCase().includes("VCPR.adf".toLowerCase())) url = VCPRadfurl;
+        else if (url.toLowerCase().includes("VROCK.adf".toLowerCase())) url = VROCKadfurl;
+        else if (url.toLowerCase().includes("WAVE.adf".toLowerCase())) url = WAVEadfurl;
+        else if (url.toLowerCase().includes("WILD.adf".toLowerCase())) url = WILDadfurl;
+       return originalOpen.call(this, method, url, ...rest);
+    };
+
+    // Load game scripts in the correct order
+    async function loadScript(src) {
+        await new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+           script.src = src.startsWith("https://")
+    ? src
+    : "https://cdn.jsdelivr.net/gh/web-ports/vice-city@796678be4ed26a13c1256be98781ca9b90beb981/" + src;
+            script.onload = resolve;
+            script.onerror = () => reject(new Error("Failed to load " + src));
+            document.body.appendChild(script);
+        });
+    }
+
+    try {
+        await loadScript("GamepadEmulator.js");
+        await loadScript("idbfs.js");
+      await loadScript("game.js");
+        loadingText.remove();
+    } catch (error) {
+        console.error(error);
+        loadingText.textContent = "Loading failed: " + error.message;
+    }
+});
+  </script>
