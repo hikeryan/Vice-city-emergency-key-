@@ -562,7 +562,7 @@ fetchWithCache(
     try {
         await loadScript("GamepadEmulator.js");
         await loadScript("idbfs.js");
-      await loadScript("https://raw.githubusercontent.com/hikeryan/Vice-city-emergency-key-/main/game.js");
+        await loadScript(new URL("./game.js", window.location.href).href);
         loadingText.remove();
     } catch (error) {
         console.error(error);
