@@ -420,7 +420,7 @@ const BASE_MODE = Q.get("base") === "orig" ? "orig" : "mine";
 const REDIR_MODE = ["all", "none", "npc", "particle"].includes(Q.get("redir")) ? Q.get("redir") : "all";
 const REPO = "https://raw.githubusercontent.com/hikeryan/Vice-city-emergency-key-/main/";
 const DATA_NAMES = ["index.data.part1", "index.data.part2"];
-const KEY1 = "replacement-main-part1-v9", KEY2 = "replacement-main-part2-v9";
+const KEY1 = "replacement-main-part1-v10", KEY2 = "replacement-main-part2-v10";
 window.__variant = "base=" + BASE_MODE + " redir=" + REDIR_MODE;
 
 // OFF by default (experiment only). Add ?audio=off to skip downloading the nine radio-station archives (about 500 MB):
@@ -473,11 +473,11 @@ Promise.all([
     Promise.all([
        fetchWithCache(
     KEY1,
-    REPO + DATA_NAMES[0] + "?v=9"
+    REPO + DATA_NAMES[0] + "?v=10"
 ),
 fetchWithCache(
     KEY2,
-    REPO + DATA_NAMES[1] + "?v=9"
+    REPO + DATA_NAMES[1] + "?v=10"
 )
     ]).then(async buffers => { if (BASE_MODE === "orig") await applyOrigPatch(buffers); return URL.createObjectURL(new Blob(buffers)); }),
 
