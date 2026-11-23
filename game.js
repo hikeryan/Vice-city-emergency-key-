@@ -200,10 +200,10 @@ async function loadGame(data) {
         spinnerElement.hidden = true;
     };
     Module.arguments = window.location.search.slice(1).split('&').filter(Boolean).map(decodeURIComponent);
-    window.onbeforeunload = function (event) {
-        event.preventEvent();
-        return '';
-    };
+   window.onbeforeunload = function (event) {
+    event.preventDefault();
+    return '';
+};
 
     window.Module = Module;
     const script = document.createElement('script');
@@ -430,7 +430,7 @@ const revc_ini = (() => {
         }
     };
 
-    setIniValue('General', 'NoMovies', '1');
+    setIniValue('General', 'NoMovies', '0');
     setIniValue('Audio', 'SfxVolume', '0');
     setIniValue('Audio', 'MusicVolume', '0');
     setIniValue('Audio', 'MP3BoostVolume', '0');
