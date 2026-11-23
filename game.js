@@ -325,8 +325,8 @@ Subtitles=0
 ShowHud=1
 RadarMode=0
 ShowLegends=0
-PedDensity=1.200000
-CarDensity=1.200000
+PedDensity=0.000000
+CarDensity=0.000000
 CutsceneBorders=0
 FreeCam=0
 [Graphics]
@@ -440,6 +440,8 @@ const revc_ini = (() => {
     // Force compatible graphics setting.
     // Overrides previously saved settings.
     setIniValue('Graphics', 'PS2AlphaTest', '0');
+    setIniValue('Display', 'PedDensity', '0.000000');
+    setIniValue('Display', 'CarDensity', '0.000000');
 
     return config;
 })();
