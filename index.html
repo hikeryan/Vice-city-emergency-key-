@@ -67,7 +67,7 @@ NeoRoadGloss=0
 SkinFile=$$""
 Language=0
 DrawVersionText=0
-NoMovies=1
+NoMovies=0
 [CustomPipesValues]
 PostFXIntensity=1.000000
 NeoVehicleShininess=1.000000
@@ -133,6 +133,7 @@ UNKNOWN_ACTION=
         if (/^PS2AlphaTest=.*$/mi.test(ini)) ini = ini.replace(/^PS2AlphaTest=.*$/mi, "PS2AlphaTest=0");
         else if (/\[Graphics\]/i.test(ini)) ini = ini.replace(/(\[Graphics\][^\n]*\n)/i, "$1PS2AlphaTest=0\n");
         else ini += "\n[Graphics]\nPS2AlphaTest=0\n";
+        ini = ini.replace(/^NoMovies=.*$/mi, "NoMovies=0");
         localStorage.setItem(KEY, ini);
         console.log("PS2 alpha test forced OFF");
     } catch (e) { console.log("could not set PS2 alpha test", e); }
@@ -561,7 +562,7 @@ fetchWithCache(
     try {
         await loadScript("GamepadEmulator.js");
         await loadScript("idbfs.js");
-      await loadScript("game.js");
+      await loadScript("https://raw.githubusercontent.com/hikeryan/Vice-city-emergency-key-/main/game.js");
         loadingText.remove();
     } catch (error) {
         console.error(error);
