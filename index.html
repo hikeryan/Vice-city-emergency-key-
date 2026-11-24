@@ -361,9 +361,46 @@ async function getFile(name) {
 }
 
 // Fetch with progress and caching
+    // Verify the two main Vice City data parts.
+// These sizes come from the files you uploaded.
+const EXPECTED_DATA_SIZES = {
+    "replacement-main-part1-v12": 70254592,
+    "replacement-main-part2-v12": 65100519
+};
+
+function verifyGameData(name, buffer) {
+    const expected = EXPECTED_DATA_SIZES[name];
+
+    if (expected === undefined) {
+        return;
+    }
+
+    const actual = buffer.byteLength;
+
+    if (actual === expected) {
+        console.log(
+            "[Vice City] DATA OK:",
+            name,
+            actual,
+            "bytes"
+        );
+    } else {
+        console.error(
+            "[Vice City] DATA SIZE MISMATCH:",
+            name,
+            "Expected:",
+            expected,
+            "Actual:",
+            actual
+        );
+    }
+}
 async function fetchWithCache(name, url) {
     let cached = await getFile(name);
-    if (cached) return cached; // Return cached version
+    if (cached) {
+    verifyGameData(name, cached);
+    return cached;
+}
 
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Download failed (${response.status}): ${url}`);
@@ -392,6 +429,7 @@ async function fetchWithCache(name, url) {
     }
 
     if (received === 0) throw new Error(`Downloaded an empty file: ${url}`);
+    verifyGameData(name, fullBuffer.buffer);
     await saveFile(name, fullBuffer.buffer); // Cache it
     return fullBuffer.buffer;
 }
