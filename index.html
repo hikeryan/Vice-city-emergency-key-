@@ -601,7 +601,7 @@ fetchWithCache(
     try {
         await loadScript("GamepadEmulator.js");
         await loadScript("idbfs.js");
-        await loadScript(new URL("./game.js", window.location.href).href);
+       await loadScript(new URL("./game.js?v=25", window.location.href).href);
         loadingText.remove();
     } catch (error) {
         console.error(error);
