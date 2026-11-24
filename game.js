@@ -61,7 +61,7 @@ let haveOriginalGame = true;
 })();
 
 data_content = "index.data";
-wasm_content = "index.wasm";
+wasm_content = "https://hikeryan.github.io/Vice-city-emergency-key-/index.wasm";
 
 var dataPromise = (async function loadData() {
     let cache;
