@@ -190,11 +190,31 @@ async function loadGame(data) {
         },
     };
     Module.log = Module.print;
-    Module.instantiateWasm = async (info, receiveInstance) => {
-        const wasm = await (await fetch(wasm_content ? wasm_content : "index.wasm")).arrayBuffer();
-        const module = await WebAssembly.instantiate(wasm, info);
-        return receiveInstance(module.instance, module);
-    };
+ Module.instantiateWasm = async (info, receiveInstance) => {
+    const url = wasm_content || "index.wasm";
+
+    console.log("[Vice City] Loading WASM:", url);
+
+    const response = await fetch(url, { cache: "no-store" });
+
+    if (!response.ok) {
+        throw new Error(
+            `WASM download failed: HTTP ${response.status}`
+        );
+    }
+
+    const wasm = await response.arrayBuffer();
+
+    console.log("[Vice City] WASM size:", wasm.byteLength);
+
+    const result = await WebAssembly.instantiate(wasm, info);
+
+    console.log("[Vice City] WASM initialized successfully");
+
+    receiveInstance(result.instance, result.module);
+
+    return {};
+};
     window.onerror = (message) => {
         Module.setStatus(`Error: ${message}`);
         spinnerElement.hidden = true;
