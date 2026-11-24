@@ -162,7 +162,17 @@ async function loadGame(data) {
                 console.error('syncRevcIni error:', e);
             }
         },
-        preRun: [],
+       preRun: [() => {
+    try {
+        Module.FS.writeFile(
+            "/vc-assets/local/revc.ini",
+            revc_ini
+        );
+        console.log("[Vice City] Startup settings applied");
+    } catch (e) {
+        console.error("[Vice City] Settings error:", e);
+    }
+}],
         postRun: [],
         print: (...args) => console.log(args.join(' ')),
         printErr: (...args) => console.error(args.join(' ')),
