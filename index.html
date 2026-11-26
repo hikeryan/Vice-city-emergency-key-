@@ -543,6 +543,17 @@ fetchWithCache(
     const PARTICLE_FILES = ["particle.txd"];
     const MODEL_FILES = REDIR_MODE === "none" ? [] : REDIR_MODE === "npc" ? NPC_FILES : REDIR_MODE === "particle" ? PARTICLE_FILES : NPC_FILES.concat(PARTICLE_FILES);
     function modelRedirect(u) {
+    const low = String(u).toLowerCase().split("?")[0];
+    const name = low.substring(low.lastIndexOf("/") + 1);
+
+    if (/(^|[\\/])water\.mp3$/.test(low)) {
+        return new URL("./audio/water.mp3?v=1", window.location.href).href;
+    }
+
+    if (SFX_OFF && /audio[\\\/].*\.mp3$/.test(low)) return SILENT_URL;
+
+    return MODEL_FILES.includes(name) ? MODEL_BASE + name + "?v=9" : null;
+}
         const low = String(u).toLowerCase().split("?")[0];
         const name = low.substring(low.lastIndexOf("/") + 1);
         if (SFX_OFF && /audio[\\\/].*\.mp3$/.test(low)) return SILENT_URL;
