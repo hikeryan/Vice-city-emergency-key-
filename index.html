@@ -554,9 +554,7 @@ fetchWithCache(
 
     return MODEL_FILES.includes(name) ? MODEL_BASE + name + "?v=9" : null;
 }
-        const low = String(u).toLowerCase().split("?")[0];
-        const name = low.substring(low.lastIndexOf("/") + 1);
-        if (SFX_OFF && /audio[\\\/].*\.mp3$/.test(low)) return SILENT_URL;
+      
         return MODEL_FILES.includes(name) ? MODEL_BASE + name + "?v=9" : null;
     }
 
