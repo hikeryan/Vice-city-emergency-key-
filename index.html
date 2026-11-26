@@ -555,9 +555,6 @@ fetchWithCache(
     return MODEL_FILES.includes(name) ? MODEL_BASE + name + "?v=9" : null;
 }
       
-        return MODEL_FILES.includes(name) ? MODEL_BASE + name + "?v=9" : null;
-    }
-
     const originalFetch = window.fetch;
     window.fetch = async function(input, init) {
         let urlString = input instanceof Request ? input.url : String(input);
